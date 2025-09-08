@@ -1,14 +1,15 @@
 import 'dart:convert';
+
 import 'package:consig_now_app/storage/token_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+
 import '../models/user.dart';
-// Ver depois
 
 class AuthService {
   final String baseUrl = dotenv.env['BASE_URL'] ?? '';
 
-  Future<User?> login(String email, String password) async {
+  Future<AuthResponse?> login(String email, String password) async {
     final response = await http.post(
       Uri.parse('$baseUrl/login'),
       headers: {'Content-Type': 'application/json'},
@@ -17,9 +18,7 @@ class AuthService {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      final user = User.fromJson(data);
-      await TokenStorage.saveToken(user.token);
-      return User.fromJson(data);
+      return AuthResponse.fromJson(data);
     }
 
     if (response.statusCode == 401) {
@@ -29,11 +28,7 @@ class AuthService {
     return null;
   }
 
-  Future<bool> logout() async {
-    final token = await TokenStorage.getToken();
-
-    if (token == null) return false;
-
+  Future<bool> logout(token) async {
     final response = await http.post(
       Uri.parse('$baseUrl/logout'),
       headers: {
@@ -48,5 +43,19 @@ class AuthService {
     }
 
     return false;
+  }
+
+  Future<User?> profile(token) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/perfil'),
+      headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return User.fromJson(data);
+    }
+
+    return null;
   }
 }

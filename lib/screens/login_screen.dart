@@ -15,6 +15,26 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
 
+  // Tenta o login por biometria ao iniciar a tela
+  @override
+  void initState() {
+    super.initState();
+    _tryBiometricLogin();
+  }
+
+  // Se o login biométrico falhar ou não houver token, o usuário verá o login normal.
+  Future<void> _tryBiometricLogin() async {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isLoggedIn = await auth.loginWithBiometrics();
+
+    if (isLoggedIn) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomeScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
@@ -47,7 +67,35 @@ class _LoginScreenState extends State<LoginScreen> {
                           _passwordController.text,
                         );
                         setState(() => _isLoading = false);
+
                         if (success) {
+                          // Pergunta se quer ativar a biometria
+                          final enableBiometrics = await showDialog<bool>(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: Text('Ativar biometria?'),
+                              content: Text(
+                                'Deseja ativar login por biometria para facilitar o acesso?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () =>
+                                      Navigator.pop(context, false),
+                                  child: Text('Não'),
+                                ),
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context, true),
+                                  child: Text('Sim'),
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (enableBiometrics == true) {
+                            await auth
+                                .enableBiometrics(); // você cria este método no provider
+                          }
+
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(builder: (_) => HomeScreen()),

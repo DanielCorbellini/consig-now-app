@@ -1,18 +1,30 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
+  static final _storage = FlutterSecureStorage();
+  static const _key = 'auth_token';
+
   static Future<void> saveToken(String token) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('auth_token', token);
+    await _storage.write(key: _key, value: token);
   }
 
   static Future<String?> getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('auth_token');
+    return await _storage.read(key: _key);
   }
 
   static Future<void> clearToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
+    await _storage.delete(key: _key);
+  }
+
+  Future<void> setBiometricsEnabled(bool enabled) async {
+    await _storage.write(
+      key: 'biometrics_enabled',
+      value: enabled ? 'true' : 'false',
+    );
+  }
+
+  Future<bool> isBiometricsEnabled() async {
+    final value = await _storage.read(key: 'biometrics_enabled');
+    return value == 'true';
   }
 }
