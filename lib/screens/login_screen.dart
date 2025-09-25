@@ -41,15 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text(
-          'Login',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -66,6 +58,21 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Column(
+                    children: [
+                      Image.asset('assets/logo.png', height: 220),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'Login',
+                        style: TextStyle(
+                          fontSize: 50,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                    ],
+                  ),
                   TextFormField(
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -73,10 +80,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       }
                       if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                         return 'O e-mail não é válido';
-                      } else {
-                        if (value.length < 6) {
-                          return 'A e-mail é muito curto';
-                        }
+                      }
+                      if (value.length < 6) {
+                        return 'O e-mail é muito curto';
                       }
                       return null;
                     },
@@ -95,10 +101,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'A senha não pode ser vazia';
-                      } else {
-                        if (value.length < 6) {
-                          return 'A senha deve ter pelo menos 6 caracteres';
-                        }
+                      }
+                      if (value.length < 6) {
+                        return 'A senha deve ter pelo menos 6 caracteres';
                       }
                       return null;
                     },
@@ -125,13 +130,15 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 40,
-                              vertical: 14,
+                              vertical: 10,
                             ),
                           ),
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               setState(() => _isLoading = true);
                               try {
+                                // Comentando o trecho original
+
                                 final success = await auth.login(
                                   _emailController.text,
                                   _passwordController.text,
@@ -177,7 +184,16 @@ class _LoginScreenState extends State<LoginScreen> {
                                       content: Text('Erro ao fazer login'),
                                     ),
                                   );
-                                }
+                                } //comentar até aqui
+
+                                // Código simplificado para pular a validação
+                                // setState(() => _isLoading = false);
+                                // Navigator.pushReplacement(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (_) => HomeScreen(),
+                                //   ),
+                                // ); //Comentar até aqui
                               } catch (e) {
                                 setState(() => _isLoading = false);
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -186,7 +202,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                             }
                           },
-                          child: const Text('Entrar'),
+                          child: const Text(
+                            'Entrar',
+                            style: TextStyle(fontSize: 18),
+                          ),
                         ),
                 ],
               ),
