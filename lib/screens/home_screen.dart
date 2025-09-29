@@ -1,4 +1,7 @@
 import 'package:consig_now_app/screens/login_screen.dart';
+import 'package:consig_now_app/screens/product_screen.dart';
+import 'package:consig_now_app/screens/conditional_screen.dart';
+import 'package:consig_now_app/screens/sale_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -68,7 +71,12 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // Ação do botão 1
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProductScreen(),
+                        ),
+                      );
                     },
                     onLongPress: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -130,7 +138,12 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      // Ação do botão 3
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ConditionalScreen(),
+                        ),
+                      );
                     },
                     onLongPress: () {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -161,6 +174,12 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SaleScreen(),
+                        ),
+                      );
                       // Ação do botão 4
                     },
                     onLongPress: () {
