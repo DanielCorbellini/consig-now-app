@@ -67,9 +67,13 @@ class ProductScreen extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
+            }
+
+            if (snapshot.hasError) {
               return Center(child: Text('Erro: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            }
+
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Center(child: Text('Nenhum produto encontrado.'));
             }
 
@@ -287,7 +291,7 @@ class ProductScreen extends StatelessWidget {
                                   children: [
                                     IconButton(
                                       icon: Icon(Icons.edit, size: 18),
-                                      onPressed: () => _editProduct(p),
+                                      onPressed: () async => _editProduct(p),
                                     ),
                                     IconButton(
                                       icon: Icon(
@@ -295,7 +299,7 @@ class ProductScreen extends StatelessWidget {
                                         size: 18,
                                         color: Colors.red,
                                       ),
-                                      onPressed: () => _deleteProduct(p),
+                                      onPressed: () async => _deleteProduct(p),
                                     ),
                                   ],
                                 ),

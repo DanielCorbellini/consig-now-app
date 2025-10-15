@@ -107,7 +107,12 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16), // Espaçamento entre os botões
                   ElevatedButton(
                     onPressed: () {
-                      // Ação do botão 2
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ConditionalScreen(),
+                        ),
+                      );
                     },
                     onLongPress: () {
                       ScaffoldMessenger.of(context).showSnackBar(

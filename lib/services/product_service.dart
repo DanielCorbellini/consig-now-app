@@ -9,9 +9,8 @@ class ProductService {
 
   Future<List<Product>> listProducts() async {
     final token = await TokenStorage.getToken();
-    if (token == null) {
-      throw Exception('Usuário não autenticado.');
-    }
+
+    if (token == null) throw Exception('Usuário não autenticado.');
 
     final response = await http.get(
       Uri.parse('$baseUrl/produto'),
@@ -20,7 +19,6 @@ class ProductService {
         'Authorization': 'Bearer $token',
       },
     );
-    print(token);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> decoded = jsonDecode(response.body);
