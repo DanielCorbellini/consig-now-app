@@ -137,63 +137,63 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (_formKey.currentState!.validate()) {
                               setState(() => _isLoading = true);
                               try {
-                                // Comentando o trecho original
+                                //Comentando o trecho original
 
-                                // final success = await auth.login(
-                                //   _emailController.text,
-                                //   _passwordController.text,
-                                // );
-                                // setState(() => _isLoading = false);
-
-                                // if (success) {
-                                //   final enableBiometrics = await showDialog<bool>(
-                                //     context: context,
-                                //     builder: (_) => AlertDialog(
-                                //       title: const Text('Ativar biometria?'),
-                                //       content: const Text(
-                                //         'Deseja ativar login por biometria para facilitar o acesso?',
-                                //       ),
-                                //       actions: [
-                                //         TextButton(
-                                //           onPressed: () =>
-                                //               Navigator.pop(context, false),
-                                //           child: const Text('Não'),
-                                //         ),
-                                //         TextButton(
-                                //           onPressed: () =>
-                                //               Navigator.pop(context, true),
-                                //           child: const Text('Sim'),
-                                //         ),
-                                //       ],
-                                //     ),
-                                //   );
-
-                                //   if (enableBiometrics == true) {
-                                //     await auth.enableBiometrics();
-                                //   }
-
-                                //   Navigator.pushReplacement(
-                                //     context,
-                                //     MaterialPageRoute(
-                                //       builder: (_) => HomeScreen(),
-                                //     ),
-                                //   );
-                                // } else {
-                                //   ScaffoldMessenger.of(context).showSnackBar(
-                                //     const SnackBar(
-                                //       content: Text('Erro ao fazer login'),
-                                //     ),
-                                //   );
-                                // } //comentar até aqui
-
-                                // Código simplificado para pular a validação
+                                final success = await auth.login(
+                                  _emailController.text,
+                                  _passwordController.text,
+                                );
                                 setState(() => _isLoading = false);
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => HomeScreen(),
-                                  ),
-                                ); //Comentar até aqui
+
+                                if (success) {
+                                  final enableBiometrics = await showDialog<bool>(
+                                    context: context,
+                                    builder: (_) => AlertDialog(
+                                      title: const Text('Ativar biometria?'),
+                                      content: const Text(
+                                        'Deseja ativar login por biometria para facilitar o acesso?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, false),
+                                          child: const Text('Não'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context, true),
+                                          child: const Text('Sim'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (enableBiometrics == true) {
+                                    await auth.enableBiometrics();
+                                  }
+
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => HomeScreen(),
+                                    ),
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Erro ao fazer login'),
+                                    ),
+                                  );
+                                } //comentar até aqui
+
+                                //Código simplificado para pular a validação
+                                // setState(() => _isLoading = false);
+                                // Navigator.pushReplacement(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (_) => HomeScreen(),
+                                //   ),
+                                // ); //Comentar até aqui
                               } catch (e) {
                                 setState(() => _isLoading = false);
                                 ScaffoldMessenger.of(context).showSnackBar(
