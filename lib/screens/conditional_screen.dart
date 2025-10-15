@@ -1,5 +1,6 @@
 import 'package:consig_now_app/models/conditional.dart';
 import 'package:consig_now_app/services/conditional_service.dart';
+import 'package:consig_now_app/widgets/generic_table.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -114,187 +115,101 @@ class ConditionalScreen extends StatelessWidget {
                       ),
                     ),
                     // Tabela com scroll horizontal
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        headingRowHeight: 56,
-                        dataRowHeight: 64,
-                        horizontalMargin: 16,
-                        columnSpacing: 24,
-                        headingRowColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.grey.shade50,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey.shade200,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'ID',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Representante',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Data de entrega',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Data Prevista',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            numeric: true,
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Status',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            numeric: true,
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Ações',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            numeric: true,
-                          ),
-                        ],
-                        rows: conditionalList.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final conditional = entry.value;
-                          final isEven = index % 2 == 0;
+                    GenericTable<Conditional>(
+                      data: conditionalList,
+                      columns: const [
+                        DataColumn(label: Text('ID')),
+                        DataColumn(label: Text('Representante')),
+                        DataColumn(label: Text('Data de entrega')),
+                        DataColumn(label: Text('Data Prevista')),
+                        DataColumn(label: Text('Status')),
+                        DataColumn(label: Text('Ações')),
+                      ],
+                      rowBuilder: (conditional, index) {
+                        final isEven = index % 2 == 0;
 
-                          return DataRow(
-                            color: MaterialStateProperty.resolveWith<Color?>((
-                              states,
-                            ) {
-                              if (states.contains(MaterialState.hovered)) {
-                                return Colors.green.shade50;
-                              }
-                              return isEven
-                                  ? Colors.white
-                                  : Colors.grey.shade50;
-                            }),
-                            cells: [
-                              DataCell(
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    '#${conditional.id}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.green.shade900,
-                                    ),
-                                  ),
+                        return DataRow(
+                          color: MaterialStateProperty.resolveWith<Color?>((
+                            states,
+                          ) {
+                            if (states.contains(MaterialState.hovered))
+                              return Colors.green.shade50;
+                            return isEven ? Colors.white : Colors.grey.shade50;
+                          }),
+                          cells: [
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
                                 ),
-                              ),
-                              DataCell(
-                                Text(
-                                  conditional.user_name,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                  ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ),
-                              DataCell(
-                                Text(
-                                  conditional.data_entrega ?? '',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  conditional.data_prevista_retorno,
+                                child: Text(
+                                  '#${conditional.id}',
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade700,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green.shade900,
                                   ),
                                 ),
                               ),
-                              DataCell(
-                                Text(
-                                  conditional.status,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
+                            ),
+                            DataCell(
+                              Text(
+                                conditional.user_name,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                conditional.data_entrega ?? '',
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                conditional.data_prevista_retorno,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                conditional.status,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    onPressed: () async =>
+                                        _editConditional(conditional),
                                   ),
-                                ),
-                              ),
-                              DataCell(
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.edit, size: 18),
-                                      onPressed: () async =>
-                                          _editConditional(conditional),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      size: 18,
+                                      color: Colors.red,
                                     ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.delete,
-                                        size: 18,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () async =>
-                                          _deleteConditional(conditional),
-                                    ),
-                                  ],
-                                ),
+                                    onPressed: () async =>
+                                        _deleteConditional(conditional),
+                                  ),
+                                ],
                               ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),

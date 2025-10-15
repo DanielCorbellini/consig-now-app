@@ -1,3 +1,4 @@
+import 'package:consig_now_app/widgets/generic_table.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product.dart';
@@ -114,200 +115,118 @@ class ProductScreen extends StatelessWidget {
                       ),
                     ),
                     // Tabela com scroll horizontal
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: DataTable(
-                        headingRowHeight: 56,
-                        dataRowHeight: 64,
-                        horizontalMargin: 16,
-                        columnSpacing: 24,
-                        headingRowColor: MaterialStateColor.resolveWith(
-                          (states) => Colors.grey.shade50,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(
-                              color: Colors.grey.shade200,
-                              width: 1,
-                            ),
-                          ),
-                        ),
-                        columns: const [
-                          DataColumn(
-                            label: Text(
-                              'ID',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Descrição',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Categoria',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Preço Custo',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            numeric: true,
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Preço Venda',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            numeric: true,
-                          ),
-                          DataColumn(
-                            label: Text(
-                              'Ações',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            numeric: true,
-                          ),
-                        ],
-                        rows: productList.asMap().entries.map((entry) {
-                          final index = entry.key;
-                          final p = entry.value;
-                          final isEven = index % 2 == 0;
+                    GenericTable<Product>(
+                      data: productList,
+                      columns: const [
+                        DataColumn(label: Text('ID')),
+                        DataColumn(label: Text('Descrição')),
+                        DataColumn(label: Text('Categoria')),
+                        DataColumn(label: Text('Preço Custo')),
+                        DataColumn(label: Text('Preço Venda')),
+                        DataColumn(label: Text('Ações')),
+                      ],
+                      rowBuilder: (p, index) {
+                        final isEven = index % 2 == 0;
 
-                          return DataRow(
-                            color: MaterialStateProperty.resolveWith<Color?>((
-                              states,
-                            ) {
-                              if (states.contains(MaterialState.hovered)) {
-                                return Colors.green.shade50;
-                              }
-                              return isEven
-                                  ? Colors.white
-                                  : Colors.grey.shade50;
-                            }),
-                            cells: [
-                              DataCell(
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green.shade100,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    '#${p.id}',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.green.shade900,
-                                    ),
-                                  ),
+                        return DataRow(
+                          color: MaterialStateProperty.resolveWith<Color?>((
+                            states,
+                          ) {
+                            if (states.contains(MaterialState.hovered))
+                              return Colors.green.shade50;
+                            return isEven ? Colors.white : Colors.grey.shade50;
+                          }),
+                          cells: [
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
                                 ),
-                              ),
-                              DataCell(
-                                Text(
-                                  p.descricao,
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black87,
-                                  ),
+                                decoration: BoxDecoration(
+                                  color: Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                              ),
-                              DataCell(
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: Colors.blue.shade200,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    p.categoria_descricao,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      color: Colors.blue.shade900,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              DataCell(
-                                Text(
-                                  'R\$ ${p.preco_custo.toStringAsFixed(2)}',
+                                child: Text(
+                                  '#${p.id}',
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade700,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.green.shade900,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                p.descricao ?? '',
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.blue.shade200,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  p.categoria_descricao ?? '',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.blue.shade900,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ),
-                              DataCell(
-                                Text(
-                                  'R\$ ${p.preco_venda.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.green,
-                                    fontWeight: FontWeight.bold,
+                            ),
+                            DataCell(
+                              Text(
+                                'R\$ ${p.preco_custo?.toStringAsFixed(2) ?? '0.00'}',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Text(
+                                'R\$ ${p.preco_venda?.toStringAsFixed(2) ?? '0.00'}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            DataCell(
+                              Row(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    onPressed: () async => _editProduct(p),
                                   ),
-                                ),
-                              ),
-                              DataCell(
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(Icons.edit, size: 18),
-                                      onPressed: () async => _editProduct(p),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      size: 18,
+                                      color: Colors.red,
                                     ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.delete,
-                                        size: 18,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () async => _deleteProduct(p),
-                                    ),
-                                  ],
-                                ),
+                                    onPressed: () async => _deleteProduct(p),
+                                  ),
+                                ],
                               ),
-                            ],
-                          );
-                        }).toList(),
-                      ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),
