@@ -1,4 +1,5 @@
 import 'package:consig_now_app/models/conditional.dart';
+import 'package:consig_now_app/screens/conditional_item_screen.dart';
 import 'package:consig_now_app/services/conditional_service.dart';
 import 'package:consig_now_app/widgets/generic_table.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +107,7 @@ class ConditionalScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        'Lista de Produtos',
+                        'Lista de Condicionais',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -138,24 +139,38 @@ class ConditionalScreen extends StatelessWidget {
                           }),
                           cells: [
                             DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade100,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  '#${conditional.id}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.green.shade900,
+                              InkWell(
+                                borderRadius: BorderRadius.circular(8),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => ConditionalItemScreen(
+                                        conditional: conditional,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade100,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    '#${conditional.id}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green.shade900,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
+
                             DataCell(
                               Text(
                                 conditional.user_name,

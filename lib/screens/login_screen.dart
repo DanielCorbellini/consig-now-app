@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (_formKey.currentState!.validate()) {
                               setState(() => _isLoading = true);
                               try {
-                                //Comentando o trecho original
+                                // Comentando o trecho original
 
                                 final success = await auth.login(
                                   _emailController.text,
@@ -186,14 +186,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   );
                                 } //comentar até aqui
 
-                                //Código simplificado para pular a validação
-                                // setState(() => _isLoading = false);
-                                // Navigator.pushReplacement(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (_) => HomeScreen(),
-                                //   ),
-                                // ); //Comentar até aqui
+                                // Código simplificado para pular a validação
+                                setState(() => _isLoading = false);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => HomeScreen(),
+                                  ),
+                                ); //Comentar até aqui
                               } catch (e) {
                                 setState(() => _isLoading = false);
                                 ScaffoldMessenger.of(context).showSnackBar(
