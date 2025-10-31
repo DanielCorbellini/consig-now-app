@@ -1,8 +1,10 @@
+import 'package:consig_now_app/widgets/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import '../models/conditional.dart';
 import '../models/conditional_item.dart';
 import '../services/conditional_item_service.dart';
 import '../widgets/generic_table.dart';
+import '../colors/minhas_cores.dart';
 
 class ConditionalItemScreen extends StatelessWidget {
   final Conditional conditional;
@@ -35,8 +37,15 @@ class ConditionalItemScreen extends StatelessWidget {
 
           final items = snapshot.data!;
 
-          return Padding(
+          return Container(
             padding: const EdgeInsets.all(16.0),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [MinhasCores.verdeTopo, MinhasCores.verdeBaixo],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
             child: Card(
               elevation: 2,
               shape: RoundedRectangleBorder(
@@ -128,17 +137,17 @@ class ConditionalItemScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 16),
-                          _buildSummaryChip(
+                          UiHelpers.buildSummaryChip(
                             'Entregue: ${items.fold<int>(0, (sum, item) => sum + item.quantidadeEntregue)}',
                             Colors.orange,
                           ),
                           const SizedBox(width: 8),
-                          _buildSummaryChip(
+                          UiHelpers.buildSummaryChip(
                             'Devolvido: ${items.fold<int>(0, (sum, item) => sum + item.quantidadeDevolvida)}',
                             Colors.purple,
                           ),
                           const SizedBox(width: 8),
-                          _buildSummaryChip(
+                          UiHelpers.buildSummaryChip(
                             'Vendido: ${items.fold<int>(0, (sum, item) => sum + item.quantidadeVendida)}',
                             Colors.green,
                           ),
@@ -291,21 +300,21 @@ class ConditionalItemScreen extends StatelessWidget {
                               ),
                             ),
                             DataCell(
-                              _buildQuantityBadge(
+                              UiHelpers.buildQuantityBadge(
                                 item.quantidadeEntregue,
                                 Colors.orange,
                                 Icons.output_outlined,
                               ),
                             ),
                             DataCell(
-                              _buildQuantityBadge(
+                              UiHelpers.buildQuantityBadge(
                                 item.quantidadeDevolvida,
                                 Colors.purple,
                                 Icons.keyboard_return,
                               ),
                             ),
                             DataCell(
-                              _buildQuantityBadge(
+                              UiHelpers.buildQuantityBadge(
                                 item.quantidadeVendida,
                                 Colors.green,
                                 Icons.shopping_cart_outlined,
@@ -321,51 +330,6 @@ class ConditionalItemScreen extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildSummaryChip(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 11,
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuantityBadge(int quantity, MaterialColor color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: color.shade700),
-          const SizedBox(width: 6),
-          Text(
-            quantity.toString(),
-            style: TextStyle(
-              fontSize: 14,
-              color: color.shade900,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }

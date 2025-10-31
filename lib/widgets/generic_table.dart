@@ -15,19 +15,17 @@ class GenericTable<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        headingRowHeight: 56,
-        dataRowHeight: 64,
-        horizontalMargin: 16,
-        columnSpacing: 24,
-        headingRowColor: MaterialStateColor.resolveWith(
-          (states) => Colors.grey.shade50,
+      scrollDirection: Axis.vertical,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          columns: columns,
+          rows: data
+              .asMap()
+              .entries
+              .map((entry) => rowBuilder(entry.value, entry.key))
+              .toList(),
         ),
-        columns: columns,
-        rows: data.asMap().entries.map((entry) {
-          return rowBuilder(entry.value, entry.key);
-        }).toList(),
       ),
     );
   }

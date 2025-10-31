@@ -6,13 +6,16 @@ import 'package:consig_now_app/models/conditional.dart';
 import 'package:consig_now_app/storage/token_storage.dart';
 
 class ConditionalService {
-  Future<List<Conditional>> listConditionals() async {
+  Future<List<Conditional>> listConditionals({
+    Map<String, dynamic>? filters,
+  }) async {
     final token = await TokenStorage.getToken();
-
     if (token == null) throw Exception('Usuário não autenticado');
 
     final response = await http.get(
-      Uri.parse('${dotenv.env['BASE_URL']}/condicional'),
+      Uri.parse(
+        '${dotenv.env['BASE_URL']}/condicional',
+      ).replace(queryParameters: filters),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',
