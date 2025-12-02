@@ -2,6 +2,9 @@ import 'package:consig_now_app/models/conditional.dart';
 import 'package:consig_now_app/screens/conditional_item_screen.dart';
 import 'package:consig_now_app/services/conditional_service.dart';
 import 'package:consig_now_app/widgets/generic_table.dart';
+import 'package:consig_now_app/widgets/info_bar.dart';
+import 'package:consig_now_app/widgets/table_container.dart';
+import 'package:consig_now_app/widgets/table_header.dart';
 import 'package:consig_now_app/widgets/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -637,339 +640,252 @@ class _ConditionalScreenState extends State<ConditionalScreen> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          children: [
-            // Header da tabela
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.green.shade600, Colors.green.shade400],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+      child: TableContainer(
+        header: const TableHeader(
+          title: 'Lista de Condicionais',
+          subtitle: 'Acompanhe a situaçao das suas condicionais',
+          icon: Icons.inventory_2_outlined,
+        ),
+        infoBar: InfoBar(
+          icon: Icons.bar_chart,
+          iconColor: Colors.green.shade700,
+          mainText: '${conditionalList.length} registros encontrados',
+          backgroundColor: Colors.green.shade50,
+          borderColor: Colors.green.shade100,
+          chips: [
+            UiHelpers.buildSummaryChip(
+              'Abertas: $totalAbertas',
+              Colors.blue,
+              onTap: () {
+                setState(() {
+                  _selectedStatus = 'aberta';
+                });
+                _applyFilters();
+              },
+            ),
+            UiHelpers.buildSummaryChip(
+              'Finalizadas: $totalFinalizados',
+              Colors.green,
+              onTap: () {
+                setState(() {
+                  _selectedStatus = 'finalizada';
+                });
+                _applyFilters();
+              },
+            ),
+            UiHelpers.buildSummaryChip(
+              'Pendentes: $totalPendentes',
+              Colors.orange,
+              onTap: () {
+                setState(() {
+                  _selectedStatus = 'em_cobranca';
+                });
+                _applyFilters();
+              },
+            ),
+          ],
+        ),
+        table: Expanded(
+          child: GenericTable<Conditional>(
+            data: conditionalList,
+            columns: const [
+              DataColumn(
+                label: Text(
+                  'ID',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.inventory_2_outlined,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+              DataColumn(
+                label: Text(
+                  'Representante',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
                   ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Lista de Condicionais',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Data de Entrega',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Previsão Retorno',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Status',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              DataColumn(
+                label: Text(
+                  'Ações',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+            rowBuilder: (conditional, index) {
+              final isEven = index % 2 == 0;
+              return DataRow(
+                color: MaterialStateProperty.resolveWith<Color?>((states) {
+                  if (states.contains(MaterialState.hovered)) {
+                    return Colors.green.shade50;
+                  }
+                  return isEven ? Colors.white : Colors.grey.shade50;
+                }),
+                cells: [
+                  DataCell(
+                    InkWell(
+                      borderRadius: BorderRadius.circular(8),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                ConditionalItemScreen(conditional: conditional),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.green.shade100,
+                              Colors.green.shade50,
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: Colors.green.shade200,
+                            width: 1,
                           ),
                         ),
-                        SizedBox(height: 2),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.tag,
+                              size: 14,
+                              color: Colors.green.shade700,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              '${conditional.id}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green.shade900,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Colors.blue.shade100,
+                          child: Text(
+                            conditional.user_name.isNotEmpty
+                                ? conditional.user_name[0].toUpperCase()
+                                : '?',
+                            style: TextStyle(
+                              color: Colors.blue.shade900,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
                         Text(
-                          'Gerencie a situação das suas condicionais',
-                          style: TextStyle(color: Colors.white70, fontSize: 12),
+                          conditional.user_name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  DataCell(
+                    UiHelpers.buildDateChip(
+                      conditional.data_entrega ?? 'N/A',
+                      Icons.calendar_today,
+                      Colors.orange,
+                    ),
+                  ),
+                  DataCell(
+                    UiHelpers.buildDateChip(
+                      conditional.data_prevista_retorno,
+                      Icons.event_available,
+                      Colors.purple,
+                    ),
+                  ),
+                  DataCell(
+                    _buildStatusChip(
+                      conditional.status == 'em_cobranca'
+                          ? 'em cobrança'
+                          : conditional.status,
+                    ),
+                  ),
+                  DataCell(
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 20),
+                          color: Colors.blue.shade600,
+                          tooltip: 'Editar',
+                          onPressed: () =>
+                              _editConditional(context, conditional),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline, size: 20),
+                          color: Colors.red.shade600,
+                          tooltip: 'Excluir',
+                          onPressed: () =>
+                              _deleteConditional(context, conditional),
                         ),
                       ],
                     ),
                   ),
                 ],
-              ),
-            ),
-
-            // Info bar com totais
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.green.shade50,
-                border: Border(
-                  bottom: BorderSide(color: Colors.green.shade100),
-                ),
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.bar_chart,
-                      size: 18,
-                      color: Colors.green.shade700,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${conditionalList.length} registros encontrados',
-                      style: TextStyle(
-                        color: Colors.green.shade900,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedStatus = 'aberta';
-                        });
-                        _applyFilters();
-                      },
-                      child: UiHelpers.buildSummaryChip(
-                        'Abertas: $totalAbertas',
-                        Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedStatus = 'finalizada';
-                        });
-                        _applyFilters();
-                      },
-                      child: UiHelpers.buildSummaryChip(
-                        'Finalizadas: $totalFinalizados',
-                        Colors.green,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedStatus = 'em_cobranca';
-                        });
-                        _applyFilters();
-                      },
-                      child: UiHelpers.buildSummaryChip(
-                        'Em cobrança: $totalPendentes',
-                        Colors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Tabela
-            Expanded(
-              child: GenericTable<Conditional>(
-                data: conditionalList,
-                columns: const [
-                  DataColumn(
-                    label: Text(
-                      'ID',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Representante',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Data de Entrega',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Previsão Retorno',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Status',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                  DataColumn(
-                    label: Text(
-                      'Ações',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ),
-                ],
-                rowBuilder: (conditional, index) {
-                  final isEven = index % 2 == 0;
-                  return DataRow(
-                    color: MaterialStateProperty.resolveWith<Color?>((states) {
-                      if (states.contains(MaterialState.hovered)) {
-                        return Colors.green.shade50;
-                      }
-                      return isEven ? Colors.white : Colors.grey.shade50;
-                    }),
-                    cells: [
-                      DataCell(
-                        InkWell(
-                          borderRadius: BorderRadius.circular(8),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => ConditionalItemScreen(
-                                  conditional: conditional,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.green.shade100,
-                                  Colors.green.shade50,
-                                ],
-                              ),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: Colors.green.shade200,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.tag,
-                                  size: 14,
-                                  color: Colors.green.shade700,
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  '${conditional.id}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.green.shade900,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      DataCell(
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 18,
-                              backgroundColor: Colors.blue.shade100,
-                              child: Text(
-                                conditional.user_name.isNotEmpty
-                                    ? conditional.user_name[0].toUpperCase()
-                                    : '?',
-                                style: TextStyle(
-                                  color: Colors.blue.shade900,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              conditional.user_name,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      DataCell(
-                        UiHelpers.buildDateChip(
-                          conditional.data_entrega ?? 'N/A',
-                          Icons.calendar_today,
-                          Colors.orange,
-                        ),
-                      ),
-                      DataCell(
-                        UiHelpers.buildDateChip(
-                          conditional.data_prevista_retorno,
-                          Icons.event_available,
-                          Colors.purple,
-                        ),
-                      ),
-                      DataCell(
-                        _buildStatusChip(
-                          conditional.status == 'em_cobranca'
-                              ? 'em cobrança'
-                              : conditional.status,
-                        ),
-                      ),
-                      DataCell(
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined, size: 20),
-                              color: Colors.blue.shade600,
-                              tooltip: 'Editar',
-                              onPressed: () =>
-                                  _editConditional(context, conditional),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, size: 20),
-                              color: Colors.red.shade600,
-                              tooltip: 'Excluir',
-                              onPressed: () =>
-                                  _deleteConditional(context, conditional),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );

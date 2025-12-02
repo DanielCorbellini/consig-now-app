@@ -110,16 +110,16 @@ class ProductScreen extends StatelessWidget {
                   mainText: '$totalProducts produtos cadastrados',
                   backgroundColor: Colors.green.shade50,
                   borderColor: Colors.green.shade100,
-                  // chips: [
-                  //   UiHelpers.buildSummaryChip(
-                  //     'Categorias: $categories',
-                  //     Colors.blue,
-                  //   ),
-                  //   UiHelpers.buildSummaryChip(
-                  //     'Valor Total: R\$ ${totalValue.toStringAsFixed(2)}',
-                  //     Colors.green,
-                  //   ),
-                  // ],
+                  chips: [
+                    UiHelpers.buildSummaryChip(
+                      'Categorias: $categories',
+                      Colors.blue,
+                    ),
+                    UiHelpers.buildSummaryChip(
+                      'Valor Total: R\$ ${totalValue.toStringAsFixed(2)}',
+                      Colors.green,
+                    ),
+                  ],
                 ),
                 table: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
