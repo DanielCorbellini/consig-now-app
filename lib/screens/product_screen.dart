@@ -10,27 +10,93 @@ import '../services/product_service.dart';
 import '../providers/auth_provider.dart';
 import '../colors/minhas_cores.dart';
 import 'login_screen.dart';
+import 'product_add_screen.dart';
+import 'product_edit_screen.dart';
 
-class ProductScreen extends StatelessWidget {
+class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key});
+
+  @override
+  State<ProductScreen> createState() => _ProductScreenState();
+}
+
+class _ProductScreenState extends State<ProductScreen> {
+  Key _tableKey = UniqueKey();
 
   Future<List<Product>> _fetchProducts() async {
     final service = ProductService();
     return await service.listProducts();
   }
 
-  // Será implementado
-  Future
-  /**<List<Product>>*/
-  _editProduct(p) async {
-    return;
+  Future<void> _addProduct() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ProductAddScreen()),
+    );
+
+    if (result == true) {
+      setState(() {
+        _tableKey = UniqueKey();
+      });
+    }
   }
 
-  // Será implementado
-  Future
-  /**<List<Product>>*/
-  _deleteProduct(p) async {
-    return;
+  Future<void> _editProduct(BuildContext context, Product product) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => ProductEditScreen(product: product)),
+    );
+
+    if (result == true) {
+      setState(() {
+        _tableKey = UniqueKey();
+      });
+    }
+  }
+
+  Future<void> _deleteProduct(BuildContext context, Product product) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content: Text(
+          'Deseja realmente excluir o produto "${product.descricao}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        final service = ProductService();
+        await service.deleteProduct(product.id);
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Produto "${product.descricao}" excluído')),
+          );
+          setState(() {
+            _tableKey = UniqueKey();
+          });
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Erro ao excluir: $e')));
+        }
+      }
+    }
   }
 
   @override
@@ -46,6 +112,15 @@ class ProductScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip: 'Atualizar',
+            onPressed: () {
+              setState(() {
+                _tableKey = UniqueKey();
+              });
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
               final auth = Provider.of<AuthProvider>(context, listen: false);
@@ -59,6 +134,11 @@ class ProductScreen extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addProduct,
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -68,18 +148,72 @@ class ProductScreen extends StatelessWidget {
           ),
         ),
         child: FutureBuilder<List<Product>>(
+          key: _tableKey,
           future: _fetchProducts(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              );
             }
 
             if (snapshot.hasError) {
-              return Center(child: Text('Erro: ${snapshot.error}'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.shade300,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Erro ao carregar dados',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${snapshot.error}',
+                      style: const TextStyle(color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              );
             }
 
             if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('Nenhum produto encontrado.'));
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.inbox_outlined,
+                      size: 80,
+                      color: Colors.grey.shade300,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Nenhum produto encontrado',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Adicione seu primeiro produto',
+                      style: TextStyle(color: Colors.grey.shade500),
+                    ),
+                  ],
+                ),
+              );
             }
 
             final productList = snapshot.data!;
@@ -126,12 +260,66 @@ class ProductScreen extends StatelessWidget {
                   child: GenericTable<Product>(
                     data: productList,
                     columns: const [
-                      DataColumn(label: Text('ID')),
-                      DataColumn(label: Text('Descrição')),
-                      DataColumn(label: Text('Categoria')),
-                      DataColumn(label: Text('Preço Custo')),
-                      DataColumn(label: Text('Preço Venda')),
-                      DataColumn(label: Text('Ações')),
+                      DataColumn(
+                        label: Text(
+                          'ID',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Descrição',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Categoria',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Preço Custo',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Preço Venda',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Ações',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
                     ],
                     rowBuilder: (p, index) {
                       final isEven = index % 2 == 0;
@@ -153,14 +341,24 @@ class ProductScreen extends StatelessWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.green.shade100,
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.green.shade100,
+                                    Colors.green.shade50,
+                                  ],
+                                ),
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.green.shade200,
+                                  width: 1,
+                                ),
                               ),
                               child: Text(
                                 '#${p.id}',
                                 style: TextStyle(
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.bold,
                                   color: Colors.green.shade900,
+                                  fontSize: 13,
                                 ),
                               ),
                             ),
@@ -217,18 +415,25 @@ class ProductScreen extends StatelessWidget {
                           ),
                           DataCell(
                             Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
-                                  icon: const Icon(Icons.edit, size: 18),
-                                  onPressed: () async => _editProduct(p),
+                                  icon: const Icon(
+                                    Icons.edit_outlined,
+                                    size: 20,
+                                  ),
+                                  color: Colors.blue.shade600,
+                                  tooltip: 'Editar',
+                                  onPressed: () => _editProduct(context, p),
                                 ),
                                 IconButton(
                                   icon: const Icon(
-                                    Icons.delete,
-                                    size: 18,
-                                    color: Colors.red,
+                                    Icons.delete_outline,
+                                    size: 20,
                                   ),
-                                  onPressed: () async => _deleteProduct(p),
+                                  color: Colors.red.shade600,
+                                  tooltip: 'Excluir',
+                                  onPressed: () => _deleteProduct(context, p),
                                 ),
                               ],
                             ),
