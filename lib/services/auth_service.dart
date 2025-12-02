@@ -25,6 +25,7 @@ class AuthService {
       throw Exception('Credenciais inválidas');
     }
 
+    print(response);
     return null;
   }
 

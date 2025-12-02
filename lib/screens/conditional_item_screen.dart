@@ -5,23 +5,166 @@ import '../models/conditional_item.dart';
 import '../services/conditional_item_service.dart';
 import '../widgets/generic_table.dart';
 import '../colors/minhas_cores.dart';
+import 'conditional_add_item_screen.dart';
 
-class ConditionalItemScreen extends StatelessWidget {
+class ConditionalItemScreen extends StatefulWidget {
   final Conditional conditional;
 
   const ConditionalItemScreen({super.key, required this.conditional});
 
+  @override
+  State<ConditionalItemScreen> createState() => _ConditionalItemScreenState();
+}
+
+class _ConditionalItemScreenState extends State<ConditionalItemScreen> {
+  late Future<List<ConditionalItem>> _itemsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshItems();
+  }
+
+  void _refreshItems() {
+    setState(() {
+      _itemsFuture = _fetchItems();
+    });
+  }
+
   Future<List<ConditionalItem>> _fetchItems() async {
     final service = ConditionalItemService();
-    return await service.listItemConditional(conditional.id);
+    return await service.listItemConditional(widget.conditional.id);
+  }
+
+  Future<void> _deleteItem(ConditionalItem item) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Confirmar Exclusão'),
+        content: Text('Deseja remover o item ${item.produtoDescricao}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Excluir'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        final service = ConditionalItemService();
+        await service.deleteItem(widget.conditional.id, item.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item removido com sucesso')),
+          );
+          _refreshItems();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Erro ao remover item: $e')));
+        }
+      }
+    }
+  }
+
+  Future<void> _editItem(ConditionalItem item) async {
+    final controller = TextEditingController(
+      text: item.quantidadeEntregue.toString(),
+    );
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Editar Quantidade'),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(
+            labelText: 'Quantidade Entregue',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final qtd = int.tryParse(controller.text);
+              if (qtd == null || qtd < 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Quantidade inválida')),
+                );
+                return;
+              }
+
+              try {
+                final service = ConditionalItemService();
+                await service.updateItem(widget.conditional.id, item.id, {
+                  'quantidade_entregue': qtd,
+                });
+                if (context.mounted) Navigator.pop(context, true);
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao atualizar: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Item atualizado com sucesso')),
+        );
+        _refreshItems();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Itens da Condicional #${conditional.id}')),
+      appBar: AppBar(
+        title: Text('Itens da Condicional #${widget.conditional.id}'),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ConditionalAddItemScreen(
+                conditionalId: widget.conditional.id,
+              ),
+            ),
+          );
+          if (result == true) {
+            _refreshItems();
+          }
+        },
+        label: const Text('Adicionar Item'),
+        icon: const Icon(Icons.add),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+      ),
       body: FutureBuilder<List<ConditionalItem>>(
-        future: _fetchItems(),
+        future: _itemsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -225,6 +368,16 @@ class ConditionalItemScreen extends StatelessWidget {
                           ),
                           numeric: true,
                         ),
+                        DataColumn(
+                          label: Text(
+                            'Ações',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
                       ],
                       rowBuilder: (item, index) {
                         final isEven = index % 2 == 0;
@@ -318,6 +471,29 @@ class ConditionalItemScreen extends StatelessWidget {
                                 item.quantidadeVendida,
                                 Colors.green,
                                 Icons.shopping_cart_outlined,
+                              ),
+                            ),
+                            DataCell(
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: Colors.blue,
+                                    ),
+                                    onPressed: () => _editItem(item),
+                                    tooltip: 'Editar Quantidade',
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete,
+                                      color: Colors.red,
+                                    ),
+                                    onPressed: () => _deleteItem(item),
+                                    tooltip: 'Remover Item',
+                                  ),
+                                ],
                               ),
                             ),
                           ],

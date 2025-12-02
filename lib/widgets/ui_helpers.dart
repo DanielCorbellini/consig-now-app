@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
 class UiHelpers {
-  static Widget buildSummaryChip(String text, Color color) {
-    return Container(
+  static Widget buildSummaryChip(
+    String text,
+    Color color, {
+    VoidCallback? onTap,
+  }) {
+    final chip = Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
@@ -18,6 +22,15 @@ class UiHelpers {
         ),
       ),
     );
+
+    return onTap != null
+        ? InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20),
+            splashColor: color.withOpacity(0.2),
+            child: chip,
+          )
+        : chip;
   }
 
   static Widget buildQuantityBadge(
