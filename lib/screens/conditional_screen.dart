@@ -683,7 +683,7 @@ class _ConditionalScreenState extends State<ConditionalScreen> {
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Gerencie suas entregas condicionais',
+                          'Gerencie a situação das suas condicionais',
                           style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                       ],

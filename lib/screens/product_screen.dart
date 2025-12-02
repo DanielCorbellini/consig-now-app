@@ -1,4 +1,8 @@
 import 'package:consig_now_app/widgets/generic_table.dart';
+import 'package:consig_now_app/widgets/table_header.dart';
+import 'package:consig_now_app/widgets/info_bar.dart';
+import 'package:consig_now_app/widgets/table_container.dart';
+import 'package:consig_now_app/widgets/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/product.dart';
@@ -80,155 +84,159 @@ class ProductScreen extends StatelessWidget {
 
             final productList = snapshot.data!;
 
+            // Calcular estatísticas
+            final totalProducts = productList.length;
+            final categories = productList
+                .map((p) => p.categoria_descricao ?? 'Sem categoria')
+                .toSet()
+                .length;
+            final totalValue = productList.fold<double>(
+              0,
+              (sum, p) => sum + (p.preco_venda ?? 0),
+            );
+
             return SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               scrollDirection: Axis.vertical,
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+              child: TableContainer(
+                header: const TableHeader(
+                  title: 'Lista de Produtos',
+                  subtitle: 'Catálogo completo de produtos',
+                  icon: Icons.inventory_2_outlined,
                 ),
-                clipBehavior: Clip.antiAlias,
-                child: Column(
-                  children: [
-                    // Cabeçalho customizado
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.green.shade600,
-                            Colors.green.shade400,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                      ),
-                      child: const Text(
-                        'Lista de Produtos',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    // Tabela com scroll horizontal
-                    GenericTable<Product>(
-                      data: productList,
-                      columns: const [
-                        DataColumn(label: Text('ID')),
-                        DataColumn(label: Text('Descrição')),
-                        DataColumn(label: Text('Categoria')),
-                        DataColumn(label: Text('Preço Custo')),
-                        DataColumn(label: Text('Preço Venda')),
-                        DataColumn(label: Text('Ações')),
-                      ],
-                      rowBuilder: (p, index) {
-                        final isEven = index % 2 == 0;
+                infoBar: InfoBar(
+                  icon: Icons.bar_chart,
+                  iconColor: Colors.green.shade700,
+                  mainText: '$totalProducts produtos cadastrados',
+                  backgroundColor: Colors.green.shade50,
+                  borderColor: Colors.green.shade100,
+                  // chips: [
+                  //   UiHelpers.buildSummaryChip(
+                  //     'Categorias: $categories',
+                  //     Colors.blue,
+                  //   ),
+                  //   UiHelpers.buildSummaryChip(
+                  //     'Valor Total: R\$ ${totalValue.toStringAsFixed(2)}',
+                  //     Colors.green,
+                  //   ),
+                  // ],
+                ),
+                table: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: GenericTable<Product>(
+                    data: productList,
+                    columns: const [
+                      DataColumn(label: Text('ID')),
+                      DataColumn(label: Text('Descrição')),
+                      DataColumn(label: Text('Categoria')),
+                      DataColumn(label: Text('Preço Custo')),
+                      DataColumn(label: Text('Preço Venda')),
+                      DataColumn(label: Text('Ações')),
+                    ],
+                    rowBuilder: (p, index) {
+                      final isEven = index % 2 == 0;
 
-                        return DataRow(
-                          color: MaterialStateProperty.resolveWith<Color?>((
-                            states,
-                          ) {
-                            if (states.contains(MaterialState.hovered))
-                              return Colors.green.shade50;
-                            return isEven ? Colors.white : Colors.grey.shade50;
-                          }),
-                          cells: [
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.shade100,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  '#${p.id}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.green.shade900,
-                                  ),
-                                ),
+                      return DataRow(
+                        color: MaterialStateProperty.resolveWith<Color?>((
+                          states,
+                        ) {
+                          if (states.contains(MaterialState.hovered)) {
+                            return Colors.green.shade50;
+                          }
+                          return isEven ? Colors.white : Colors.grey.shade50;
+                        }),
+                        cells: [
+                          DataCell(
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
                               ),
-                            ),
-                            DataCell(
-                              Text(
-                                p.descricao ?? '',
-                                style: const TextStyle(fontSize: 14),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade100,
+                                borderRadius: BorderRadius.circular(8),
                               ),
-                            ),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.blue.shade200,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: Text(
-                                  p.categoria_descricao ?? '',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.blue.shade900,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            DataCell(
-                              Text(
-                                'R\$ ${p.preco_custo?.toStringAsFixed(2) ?? '0.00'}',
+                              child: Text(
+                                '#${p.id}',
                                 style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade700,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green.shade900,
+                                ),
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              p.descricao ?? '',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          DataCell(
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.blue.shade200,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                p.categoria_descricao ?? '',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.blue.shade900,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
-                            DataCell(
-                              Text(
-                                'R\$ ${p.preco_venda?.toStringAsFixed(2) ?? '0.00'}',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.bold,
+                          ),
+                          DataCell(
+                            Text(
+                              'R\$ ${p.preco_custo?.toStringAsFixed(2) ?? '0.00'}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Text(
+                              'R\$ ${p.preco_venda?.toStringAsFixed(2) ?? '0.00'}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.green,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          DataCell(
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit, size: 18),
+                                  onPressed: () async => _editProduct(p),
                                 ),
-                              ),
-                            ),
-                            DataCell(
-                              Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, size: 18),
-                                    onPressed: () async => _editProduct(p),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    size: 18,
+                                    color: Colors.red,
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      size: 18,
-                                      color: Colors.red,
-                                    ),
-                                    onPressed: () async => _deleteProduct(p),
-                                  ),
-                                ],
-                              ),
+                                  onPressed: () async => _deleteProduct(p),
+                                ),
+                              ],
                             ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
               ),
             );
