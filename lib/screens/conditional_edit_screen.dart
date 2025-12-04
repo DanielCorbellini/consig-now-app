@@ -3,6 +3,7 @@ import 'package:consig_now_app/services/conditional_service.dart';
 import 'package:consig_now_app/widgets/ui_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../colors/minhas_cores.dart';
 
 class ConditionalEditScreen extends StatefulWidget {
   final Conditional conditional;
@@ -90,82 +91,124 @@ class _ConditionalEditScreenState extends State<ConditionalEditScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Editar Condicional #${widget.conditional.id}'),
+        backgroundColor: MinhasCores.verdeTopo,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle('Status'),
-              DropdownButtonFormField<String>(
-                value: _status,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.flag),
-                ),
-                items: _statusOptions.map((status) {
-                  return DropdownMenuItem(
-                    value: status,
-                    child: Text(UiHelpers.capitalizeFirstLetter(status)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) setState(() => _status = value);
-                },
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [MinhasCores.verdeTopo, MinhasCores.verdeBaixo],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(height: 24),
-              _buildSectionTitle('Datas'),
-              TextFormField(
-                controller: _dataEntregaController,
-                decoration: const InputDecoration(
-                  labelText: 'Data de Entrega',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.calendar_today),
-                ),
-                readOnly: true,
-                onTap: () => _selectDate(_dataEntregaController),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Informe a data de entrega';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _dataRetornoController,
-                decoration: const InputDecoration(
-                  labelText: 'Previsão de Retorno',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.event),
-                ),
-                readOnly: true,
-                onTap: () => _selectDate(_dataRetornoController),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Informe a previsão de retorno';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 32),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _save,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Dados da Condicional',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: MinhasCores.verdeTopo,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Status'),
+                      DropdownButtonFormField<String>(
+                        value: _status,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.flag),
+                        ),
+                        items: _statusOptions.map((status) {
+                          return DropdownMenuItem(
+                            value: status,
+                            child: Text(
+                              UiHelpers.capitalizeFirstLetter(status),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          if (value != null) setState(() => _status = value);
+                        },
+                      ),
+                      const SizedBox(height: 24),
+                      _buildSectionTitle('Datas'),
+                      TextFormField(
+                        controller: _dataEntregaController,
+                        decoration: const InputDecoration(
+                          labelText: 'Data de Entrega',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.calendar_today),
+                        ),
+                        readOnly: true,
+                        onTap: () => _selectDate(_dataEntregaController),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Informe a data de entrega';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _dataRetornoController,
+                        decoration: const InputDecoration(
+                          labelText: 'Previsão de Retorno',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.event),
+                        ),
+                        readOnly: true,
+                        onTap: () => _selectDate(_dataRetornoController),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Informe a previsão de retorno';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 32),
+                      ElevatedButton(
+                        onPressed: _isLoading ? null : _save,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: MinhasCores.verdeTopo,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: _isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Text(
+                                'Salvar Alterações',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ],
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text('Salvar Alterações'),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

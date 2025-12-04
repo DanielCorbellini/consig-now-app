@@ -1,7 +1,7 @@
 import 'package:consig_now_app/screens/login_screen.dart';
 import 'package:consig_now_app/screens/product_screen.dart';
 import 'package:consig_now_app/screens/conditional_screen.dart';
-import 'package:consig_now_app/screens/sale_screen.dart';
+import 'package:consig_now_app/screens/sales_screen.dart';
 import 'package:consig_now_app/screens/pos_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -146,7 +146,7 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const SaleScreen(),
+                          builder: (context) => const SalesScreen(),
                         ),
                       );
                     },

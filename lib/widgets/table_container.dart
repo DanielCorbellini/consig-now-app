@@ -19,7 +19,13 @@ class TableContainer extends StatelessWidget {
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       clipBehavior: Clip.antiAlias,
-      child: Column(children: [header, if (infoBar != null) infoBar!, table]),
+      child: Column(
+        children: [
+          header,
+          if (infoBar != null) infoBar!,
+          Expanded(child: table),
+        ],
+      ),
     );
   }
 }

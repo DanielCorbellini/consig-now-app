@@ -93,7 +93,7 @@ class _ProductScreenState extends State<ProductScreen> {
         if (mounted) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Erro ao excluir: $e')));
+          ).showSnackBar(SnackBar(content: Text('$e')));
         }
       }
     }
@@ -229,218 +229,219 @@ class _ProductScreenState extends State<ProductScreen> {
               (sum, p) => sum + (p.preco_venda ?? 0),
             );
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              scrollDirection: Axis.vertical,
-              child: TableContainer(
-                header: const TableHeader(
-                  title: 'Lista de Produtos',
-                  subtitle: 'Catálogo completo de produtos',
-                  icon: Icons.inventory_2_outlined,
-                ),
-                infoBar: InfoBar(
-                  icon: Icons.bar_chart,
-                  iconColor: Colors.green.shade700,
-                  mainText: '$totalProducts produtos cadastrados',
-                  backgroundColor: Colors.green.shade50,
-                  borderColor: Colors.green.shade100,
-                  chips: [
-                    UiHelpers.buildSummaryChip(
-                      'Categorias: $categories',
-                      Colors.blue,
-                    ),
-                    UiHelpers.buildSummaryChip(
-                      'Valor Total: R\$ ${totalValue.toStringAsFixed(2)}',
-                      Colors.green,
-                    ),
-                  ],
-                ),
-                table: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: GenericTable<Product>(
-                    data: productList,
-                    columns: const [
-                      DataColumn(
-                        label: Text(
-                          'ID',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
+            return SizedBox.expand(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: TableContainer(
+                  header: const TableHeader(
+                    title: 'Lista de Produtos',
+                    subtitle: 'Catálogo completo de produtos',
+                    icon: Icons.inventory_2_outlined,
+                  ),
+                  infoBar: InfoBar(
+                    icon: Icons.bar_chart,
+                    iconColor: Colors.green.shade700,
+                    mainText: '$totalProducts produtos cadastrados',
+                    backgroundColor: Colors.green.shade50,
+                    borderColor: Colors.green.shade100,
+                    chips: [
+                      UiHelpers.buildSummaryChip(
+                        'Categorias: $categories',
+                        Colors.blue,
                       ),
-                      DataColumn(
-                        label: Text(
-                          'Descrição',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          'Categoria',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          'Preço Custo',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          'Preço Venda',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      DataColumn(
-                        label: Text(
-                          'Ações',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Colors.black87,
-                          ),
-                        ),
+                      UiHelpers.buildSummaryChip(
+                        'Valor Total: R\$ ${totalValue.toStringAsFixed(2)}',
+                        Colors.green,
                       ),
                     ],
-                    rowBuilder: (p, index) {
-                      final isEven = index % 2 == 0;
+                  ),
+                  table: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: GenericTable<Product>(
+                      data: productList,
+                      columns: const [
+                        DataColumn(
+                          label: Text(
+                            'ID',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Descrição',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Categoria',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Preço Custo',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Preço Venda',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        DataColumn(
+                          label: Text(
+                            'Ações',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                      ],
+                      rowBuilder: (p, index) {
+                        final isEven = index % 2 == 0;
 
-                      return DataRow(
-                        color: MaterialStateProperty.resolveWith<Color?>((
-                          states,
-                        ) {
-                          if (states.contains(MaterialState.hovered)) {
-                            return Colors.green.shade50;
-                          }
-                          return isEven ? Colors.white : Colors.grey.shade50;
-                        }),
-                        cells: [
-                          DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.green.shade100,
-                                    Colors.green.shade50,
-                                  ],
+                        return DataRow(
+                          color: MaterialStateProperty.resolveWith<Color?>((
+                            states,
+                          ) {
+                            if (states.contains(MaterialState.hovered)) {
+                              return Colors.green.shade50;
+                            }
+                            return isEven ? Colors.white : Colors.grey.shade50;
+                          }),
+                          cells: [
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
                                 ),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.green.shade200,
-                                  width: 1,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.green.shade100,
+                                      Colors.green.shade50,
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: Colors.green.shade200,
+                                    width: 1,
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                '#${p.id}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green.shade900,
-                                  fontSize: 13,
+                                child: Text(
+                                  '#${p.id}',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green.shade900,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          DataCell(
-                            Text(
-                              p.descricao ?? '',
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ),
-                          DataCell(
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
+                            DataCell(
+                              Text(
+                                p.descricao ?? '',
+                                style: const TextStyle(fontSize: 14),
                               ),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: Colors.blue.shade200,
-                                  width: 1,
+                            ),
+                            DataCell(
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.shade50,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: Colors.blue.shade200,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Text(
+                                  p.categoria_descricao ?? '',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.blue.shade900,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                p.categoria_descricao ?? '',
+                            ),
+                            DataCell(
+                              Text(
+                                'R\$ ${p.preco_custo?.toStringAsFixed(2) ?? '0.00'}',
                                 style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.blue.shade900,
+                                  fontSize: 14,
+                                  color: Colors.grey.shade700,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
-                          ),
-                          DataCell(
-                            Text(
-                              'R\$ ${p.preco_custo?.toStringAsFixed(2) ?? '0.00'}',
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey.shade700,
-                                fontWeight: FontWeight.w500,
+                            DataCell(
+                              Text(
+                                'R\$ ${p.preco_venda?.toStringAsFixed(2) ?? '0.00'}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          DataCell(
-                            Text(
-                              'R\$ ${p.preco_venda?.toStringAsFixed(2) ?? '0.00'}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.green,
-                                fontWeight: FontWeight.bold,
+                            DataCell(
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.edit_outlined,
+                                      size: 20,
+                                    ),
+                                    color: Colors.blue.shade600,
+                                    tooltip: 'Editar',
+                                    onPressed: () => _editProduct(context, p),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.delete_outline,
+                                      size: 20,
+                                    ),
+                                    color: Colors.red.shade600,
+                                    tooltip: 'Excluir',
+                                    onPressed: () => _deleteProduct(context, p),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                          DataCell(
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.edit_outlined,
-                                    size: 20,
-                                  ),
-                                  color: Colors.blue.shade600,
-                                  tooltip: 'Editar',
-                                  onPressed: () => _editProduct(context, p),
-                                ),
-                                IconButton(
-                                  icon: const Icon(
-                                    Icons.delete_outline,
-                                    size: 20,
-                                  ),
-                                  color: Colors.red.shade600,
-                                  tooltip: 'Excluir',
-                                  onPressed: () => _deleteProduct(context, p),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      );
-                    },
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
