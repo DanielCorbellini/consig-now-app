@@ -30,11 +30,16 @@ class ConditionalService {
       },
     );
 
-    print(uri);
     if (response.statusCode == 200) {
       final Map<String, dynamic> decoded = jsonDecode(response.body);
       final List<dynamic> data = decoded['condicional'];
       return data.map((json) => Conditional.fromJson(json)).toList();
+    }
+
+    if (response.statusCode == 422) {
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      final List<dynamic> data = decoded['message'];
+      throw Exception(data);
     }
 
     if (response.statusCode == 401) {
