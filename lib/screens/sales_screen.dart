@@ -222,7 +222,9 @@ class _SalesScreenState extends State<SalesScreen> {
                               ),
                             ),
                             DataCell(Text(sale.dataVenda ?? '-')),
-                            DataCell(Text(sale.representanteNome ?? '-')),
+                            DataCell(
+                              Text(sale.representante?.user?.name ?? '-'),
+                            ),
                             DataCell(
                               Text(
                                 'R\$ ${sale.valorTotal?.toStringAsFixed(2) ?? '0.00'}',

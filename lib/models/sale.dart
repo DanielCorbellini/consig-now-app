@@ -1,3 +1,5 @@
+import 'package:consig_now_app/models/representative.dart';
+
 class Sale {
   final int id;
   final int? condicionalId;
@@ -5,7 +7,7 @@ class Sale {
   final double? valorTotal;
   final String? formaPagamento;
   final String? status;
-  final String? representanteNome;
+  final Representative? representante;
 
   Sale({
     required this.id,
@@ -14,7 +16,7 @@ class Sale {
     this.valorTotal,
     this.formaPagamento,
     this.status,
-    this.representanteNome,
+    this.representante,
   });
 
   factory Sale.fromJson(Map<String, dynamic> json) {
@@ -34,7 +36,9 @@ class Sale {
           : 0.0,
       formaPagamento: json['forma_pagamento'],
       status: json['status'],
-      representanteNome: repName,
+      representante: json['representante'] != null
+          ? Representative.fromJson(json['representante'])
+          : null,
     );
   }
 
