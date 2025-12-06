@@ -655,7 +655,7 @@ class _ConditionalScreenState extends State<ConditionalScreen> {
                 },
               ),
               UiHelpers.buildSummaryChip(
-                'Pendentes: $totalPendentes',
+                'Em cobrança: $totalPendentes',
                 Colors.orange,
                 onTap: () {
                   setState(() {
