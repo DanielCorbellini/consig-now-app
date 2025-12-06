@@ -38,7 +38,7 @@ class _ProductEditScreenState extends State<ProductEditScreen> {
     _precoVendaController = TextEditingController(
       text: widget.product.preco_venda.toStringAsFixed(2),
     );
-    _selectedCategoryId = widget.product.categoria_id;
+    _selectedCategoryId = widget.product.categoria_id ?? 0;
     _loadCategories();
   }
 

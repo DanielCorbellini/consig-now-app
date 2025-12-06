@@ -1,3 +1,5 @@
+import 'package:consig_now_app/models/product.dart';
+
 class Stock {
   final int id;
   final int almoxarifadoId;
@@ -7,6 +9,7 @@ class Stock {
   final double? precoVenda;
   final double? precoCusto;
   final String? categoriaDescricao;
+  final Product? produto;
 
   Stock({
     required this.id,
@@ -17,6 +20,7 @@ class Stock {
     this.precoVenda,
     this.precoCusto,
     this.categoriaDescricao,
+    this.produto,
   });
 
   factory Stock.fromJson(Map<String, dynamic> json) {
@@ -34,6 +38,9 @@ class Stock {
           ? double.tryParse(produto['preco_custo'].toString())
           : null,
       categoriaDescricao: produto?['categoria']?['descricao'],
+      produto: produto != null && produto['id'] != null
+          ? Product.fromJson(produto)
+          : null,
     );
   }
 }

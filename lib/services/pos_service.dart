@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../storage/token_storage.dart';
 import '../models/stock.dart';
+import '../models/product.dart';
 import 'auth_service.dart';
 
 class PosService {
@@ -12,39 +13,51 @@ class PosService {
     return await TokenStorage.getToken();
   }
 
-  /// Lista produtos do estoque, opcionalmente filtrado por almoxarifado
-  Future<List<Stock>> listStock() async {
+  /// Lista produtos disponíveis em uma condicional
+  Future<List<Stock>> getAvailableStock(int conditionalId) async {
     final token = await _getToken();
     if (token == null) {
       throw Exception('Token não encontrado');
     }
 
-    String queryString = '';
-    final user = await AuthService().profile(token);
-
-    if (user == null) {
-      throw Exception('Não foi possível obter os dados do usuário');
-    }
-
-    queryString = '?usuario_id=${user.id}';
-
     final response = await http.get(
-      Uri.parse('$_baseUrl/estoques$queryString'),
-      headers: {'Authorization': 'Bearer $token', 'Accept': 'application/json'},
+      Uri.parse('$_baseUrl/condicional/$conditionalId/itens/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
     );
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data['success'] == true && data['stocks'] != null) {
-        final List<dynamic> stocksJson = data['stocks'];
-        return stocksJson.map((json) => Stock.fromJson(json)).toList();
+      final Map<String, dynamic> decoded = jsonDecode(response.body);
+      if (decoded['success'] == true && decoded['condicional'] != null) {
+        final List<dynamic> items = decoded['condicional'];
+        return items.map((item) {
+          final produto = item['produto'] ?? {};
+          final qtd =
+              (item['quantidade_entregue'] ?? 0) -
+              (item['quantidade_vendida'] ?? 0) -
+              (item['quantidade_devolvida'] ?? 0);
+
+          return Stock(
+            id: item['id'], // ID do item da condicional
+            produtoId: item['produto_id'],
+            almoxarifadoId: 0, // Não relevante aqui
+            quantidade: qtd > 0 ? qtd : 0,
+            produtoDescricao: produto['descricao'],
+            precoVenda:
+                double.tryParse(produto['preco_venda']?.toString() ?? '0') ??
+                0.0,
+            produto: produto.isNotEmpty && produto['id'] != null
+                ? Product.fromJson(produto)
+                : null,
+          );
+        }).toList();
       }
       return [];
-    } else if (response.statusCode == 404) {
-      return [];
-    } else {
-      throw Exception('Falha ao carregar estoque: ${response.body}');
     }
+
+    throw Exception('Erro ao carregar itens da condicional: ${response.body}');
   }
 
   /// Cria uma nova venda vinculada a uma condicional

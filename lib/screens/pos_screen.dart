@@ -28,9 +28,14 @@ class _PosScreenState extends State<PosScreen> {
   final List<CartItem> _cart = [];
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _selectedPaymentMethod = 'dinheiro';
+  String? _selectedPaymentMethod;
 
-  final List<String> _paymentMethods = ['dinheiro', 'cartao', 'pix', 'outros'];
+  final Map<String, String> _paymentMethods = {
+    'dinheiro': 'DINHEIRO',
+    'cartao': 'CARTÃO',
+    'pix': 'PIX',
+    'outros': 'OUTROS',
+  };
 
   @override
   void initState() {
@@ -70,9 +75,7 @@ class _PosScreenState extends State<PosScreen> {
   Future<void> _loadConditionalItems(int conditionalId) async {
     setState(() => _isLoading = true);
     try {
-      final items = await _conditionalService.getConditionalItems(
-        conditionalId,
-      );
+      final items = await _posService.getAvailableStock(conditionalId);
       setState(() {
         _stockItems = items;
         _isLoading = false;
@@ -226,7 +229,7 @@ class _PosScreenState extends State<PosScreen> {
       final vendaId = await _posService.createSale(
         clienteId: 1,
         condicionalId: _selectedConditional!.id,
-        formaPagamento: _selectedPaymentMethod,
+        formaPagamento: _selectedPaymentMethod ?? 'dinheiro',
       );
 
       for (final item in _cart) {
@@ -258,208 +261,320 @@ class _PosScreenState extends State<PosScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        builder: (_, controller) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              // Handle bar
-              Center(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
+      builder: (modalContext) => StatefulBuilder(
+        builder: (builderContext, setModalState) {
+          return DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            builder: (_, controller) => Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
               ),
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Carrinho (${_cart.length})',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_sweep, color: Colors.red),
-                      onPressed: () {
-                        setState(() => _cart.clear());
-                        Navigator.pop(context);
-                      },
-                      tooltip: 'Limpar carrinho',
-                    ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              // Payment Method Selection
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Forma de Pagamento',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                children: [
+                  // Handle bar
+                  Center(
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 12),
+                      width: 40,
+                      height: 4,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedPaymentMethod,
-                          items: _paymentMethods.map((String method) {
-                            return DropdownMenuItem<String>(
-                              value: method,
-                              child: Text(
-                                method.toUpperCase(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _selectedPaymentMethod = newValue;
-                              });
-                            }
-                          },
-                        ),
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              const Divider(),
-              // Cart Items
-              Expanded(
-                child: _cart.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.shopping_cart_outlined,
-                              size: 64,
-                              color: Colors.grey.shade300,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Seu carrinho está vazio',
-                              style: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
+                  ),
+                  // Header
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Carrinho (${_cart.length})',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      )
-                    : ListView.separated(
-                        controller: controller,
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _cart.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final item = _cart[index];
-                          return _buildCartItem(item);
-                        },
-                      ),
-              ),
-              // Footer
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  border: Border(top: BorderSide(color: Colors.grey.shade200)),
-                ),
-                child: SafeArea(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Total a Pagar',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black54,
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_sweep,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            setState(() => _cart.clear());
+                            Navigator.pop(modalContext);
+                          },
+                          tooltip: 'Limpar carrinho',
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(),
+                  // Payment Method Selection
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 8,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Forma de Pagamento',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: DropdownButtonHideUnderline(
+                            child: DropdownButton<String>(
+                              isExpanded: true,
+                              value: _selectedPaymentMethod,
+                              hint: const Text(
+                                'Selecione a forma de pagamento',
+                              ),
+                              items: _paymentMethods.entries.map((entry) {
+                                return DropdownMenuItem<String>(
+                                  value: entry.key,
+                                  child: Text(
+                                    entry.value,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                if (newValue != null) {
+                                  setState(() {
+                                    _selectedPaymentMethod = newValue;
+                                  });
+                                  setModalState(() {});
+                                }
+                              },
                             ),
                           ),
-                          Text(
-                            'R\$ ${_total.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(),
+                  // Cart Items
+                  Expanded(
+                    child: _cart.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.shopping_cart_outlined,
+                                  size: 64,
+                                  color: Colors.grey.shade300,
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'Seu carrinho está vazio',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.separated(
+                            controller: controller,
+                            padding: const EdgeInsets.all(16),
+                            itemCount: _cart.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) {
+                              final item = _cart[index];
+                              return _buildCartItemWithCallback(
+                                item,
+                                setModalState,
+                              );
+                            },
+                          ),
+                  ),
+                  // Footer
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      border: Border(
+                        top: BorderSide(color: Colors.grey.shade200),
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Total a Pagar',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                              Text(
+                                'R\$ ${_total.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed:
+                                  _cart.isEmpty || _selectedConditional == null
+                                  ? null
+                                  : _finalizeSale,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: MinhasCores.verdeTopo,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'FINALIZAR VENDA',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed:
-                              _cart.isEmpty || _selectedConditional == null
-                              ? null
-                              : _finalizeSale,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: MinhasCores.verdeTopo,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'FINALIZAR VENDA',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildCartItemWithCallback(CartItem item, StateSetter setModalState) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.produtoDescricao,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'R\$ ${item.precoUnitario.toStringAsFixed(2)} x ${item.quantidade}',
+                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                ),
+                Text(
+                  'Subtotal: R\$ ${(item.precoUnitario * item.quantidade).toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: Colors.green.shade700,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.remove, size: 18),
+                  onPressed: () {
+                    _updateQuantity(item.produtoId, -1);
+                    setModalState(() {});
+                  },
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
+                  padding: EdgeInsets.zero,
+                  color: Colors.grey.shade700,
+                ),
+                Container(
+                  constraints: const BoxConstraints(minWidth: 24),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '${item.quantidade}',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add, size: 18),
+                  onPressed: () {
+                    _updateQuantity(item.produtoId, 1);
+                    setModalState(() {});
+                  },
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
+                  padding: EdgeInsets.zero,
+                  color: MinhasCores.verdeTopo,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
